@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>MutiToONE</title>
+<style>
+  :root {
+    --ink:#141414; --sub:#8b919b; --line:#eef0f3;
+    --bg:#fafafa; --card:#ffffff; --accent:#141414;
+    --blue:#1f3b73; --ok:#12805c; --warn:#b03030;
+  }
+  * { box-sizing: border-box; }
+  html, body { height:100%; }
+  body {
+    margin:0; background:var(--bg); color:var(--ink);
+    font:14px/1.6 -apple-system,"Segoe UI","Microsoft YaHei",sans-serif;
+    overflow:hidden;
+  }
+
+  /* ---------- 顶栏 ---------- */
+  .brandbar { height:52px; flex:0 0 52px; padding:0 26px 0 14px; }
+  .brand-in { height:100%; display:flex; align-items:center; gap:10px; }
+  .logo {
+    width:28px; height:28px; border-radius:8px; flex:0 0 28px;
+    background:url(data:image/png;base64,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) center / contain no-repeat;
+  }
+  .bname { font-size:14px; font-weight:600; letter-spacing:.2px; }
+  .brandbar .spacer { flex:1; }
+
+  /* ---------- 通知 ---------- */
+  .bell { position:relative; width:38px; height:38px; border:0; border-radius:11px;
+          background:transparent; color:#5b626d; cursor:pointer; display:grid; place-items:center;
+          transition:background .15s, color .15s; }
+  .bell:hover { background:#f1f2f5; color:#1b1b1b; }
+  .bell svg { width:19px; height:19px; stroke:currentColor; fill:none;
+              stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; }
+  .bell .dot { position:absolute; top:8px; right:9px; width:8px; height:8px; border-radius:50%;
+               background:#e0453b; border:2px solid #fafafa; display:none; }
+  .bell.has .dot { display:block; }
+  .notices { position:absolute; top:calc(100% + 6px); right:0; width:330px; background:#fff;
+             border:1px solid var(--line); border-radius:14px; overflow:hidden;
+             box-shadow:0 18px 44px rgba(16,24,40,.16); display:none; z-index:45; }
+  .notices.on { display:block; }
+  .notices .hd { display:flex; align-items:center; justify-content:space-between;
+                 padding:12px 15px; border-bottom:1px solid var(--line);
+                 font-size:13px; font-weight:600; }
+  .notices .hd a { color:var(--sub); font-size:12px; text-decoration:none; font-weight:400; }
+  .notices .hd a:hover { color:var(--ink); }
+  .notices .n { padding:13px 15px; border-bottom:1px solid #f4f5f7; }
+  .notices .n:last-child { border-bottom:0; }
+  .notices .n.unread { background:#fcfcfd; }
+  .notices .nt { font-size:13px; font-weight:600; display:flex; gap:7px; align-items:center; }
+  .notices .nt .p { width:6px; height:6px; border-radius:50%; background:#e0453b; flex:0 0 6px; }
+  .notices .nd { font-size:12px; color:var(--sub); line-height:1.65; margin:4px 0 0 13px; }
+  .notices .nwhen { font-size:11.5px; color:#b3b8c0; margin:5px 0 0 13px; }
+  .notices .na { margin:9px 0 0 13px; display:flex; gap:8px; }
+  .notices .na button { padding:6px 13px; border:0; border-radius:8px; font-size:12px;
+                        font-family:inherit; cursor:pointer; background:#f2f3f6; color:#2c3138; }
+  .notices .na button:hover { background:#e9ebf0; }
+  .notices .na button.go { background:var(--accent); color:#fff; }
+  .notices .na button.go:hover { background:#000; }
+  .notices .empty { padding:26px 15px; text-align:center; color:var(--sub); font-size:12.5px; }
+
+  /* ---------- 主体 ---------- */
+  .body { display:flex; height:calc(100% - 52px); }
+
+  .rail {
+    width:84px; flex:0 0 84px; display:flex; flex-direction:column;
+    align-items:center; padding:10px 0 14px; gap:6px;
+  }
+  .nav { position:relative; width:44px; height:44px; border:0; border-radius:13px; background:transparent;
+         color:#5b626d; cursor:pointer; display:grid; place-items:center;
+         transition:background .15s, color .15s; }
+  .nav:hover { background:#eceef2; color:#1b1b1b; }
+  .nav.active { background:#e7e9ee; color:#1b1b1b; }
+  .nav svg { width:20px; height:20px; stroke:currentColor; fill:none;
+             stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; }
+  /* 悬停提示 */
+  .nav::after {
+    content: attr(data-tip);
+    position:absolute; left:calc(100% + 9px); top:50%;
+    transform:translateY(-50%) translateX(-3px);
+    background:#1b2430; color:#fff; font-size:12px; line-height:1;
+    padding:6px 9px; border-radius:7px; white-space:nowrap;
+    opacity:0; pointer-events:none; transition:opacity .12s, transform .12s;
+    z-index:50;
+  }
+  .nav::before {
+    content:""; position:absolute; left:calc(100% - 1px); top:50%;
+    transform:translateY(-50%); border:5px solid transparent;
+    border-right-color:#1b2430;
+    opacity:0; pointer-events:none; transition:opacity .12s; z-index:50;
+  }
+  .nav:hover::after, .nav:hover::before { opacity:1; }
+  .nav:hover::after { transform:translateY(-50%) translateX(0); }
+
+  /* 图标角标：进度环 / 完成红点 */
+  .nav .prg { position:absolute; top:3px; right:3px; width:15px; height:15px; border-radius:50%;
+              background:conic-gradient(#1f3b73 calc(var(--p, 0) * 1%), #e3e6ec 0);
+              display:none; }
+  .nav .prg::after { content:""; position:absolute; inset:3px; border-radius:50%; background:#fafafa; }
+  .nav .prg.on { display:block; }
+  .nav .rdot { position:absolute; top:5px; right:5px; width:8px; height:8px; border-radius:50%;
+               background:#e0453b; border:2px solid #fafafa; display:none; }
+  .nav .rdot.on { display:block; }
+  .rail .spacer { flex:1; }
+
+  .content {
+    flex:1; min-width:0; overflow:auto; padding:0 26px 30px 18px;
+    scrollbar-gutter: stable;
+  }
+  .pagehead { position:relative; display:flex; align-items:center;
+              justify-content:space-between; margin:0 0 22px; }
+  .hact { display:flex; align-items:center; gap:10px; }
+
+  /* 进度环（在铃铛左侧） */
+  .ring { position:relative; width:34px; height:34px; flex:0 0 34px; }
+  .ring svg { width:34px; height:34px; transform:rotate(-90deg); display:block; }
+  .ring circle { fill:none; stroke-width:3; }
+  .ring .rbg { stroke:#e9ebf0; }
+  .ring .rfg { stroke:#1f3b73; stroke-linecap:round;
+               stroke-dasharray:97.4; stroke-dashoffset:97.4;
+               transition:stroke-dashoffset .35s ease; }
+  .ring span { position:absolute; inset:0; display:grid; place-items:center;
+               font-size:9px; font-weight:600; color:#1f3b73; letter-spacing:-.2px;
+               font-variant-numeric:tabular-nums; }
+  .page-title { font-size:26px; font-weight:700; margin:0; letter-spacing:.3px; }
+  /* 不设 max-width：卡片右缘始终等于内容区右缘，铃铛才能对齐 */
+  .wrap { max-width:none; }
+
+  /* ---------- 年月选择卡片 ---------- */
+  .picker { position:relative; }
+  .pbtn {
+    display:inline-flex; align-items:center; gap:8px; min-width:132px;
+    padding:10px 13px; border:1px solid var(--line); border-radius:12px;
+    background:#fbfbfc; font-family:inherit; font-size:13px; color:var(--ink);
+    cursor:pointer; justify-content:space-between;
+  }
+  .pbtn:hover { background:#f6f7f9; }
+  .pbtn.on { border-color:#c9cede; background:#fff; }
+  .pbtn .cv { width:12px; height:12px; stroke:#8b919b; fill:none; stroke-width:2;
+              stroke-linecap:round; stroke-linejoin:round; }
+  .pbtn .ph { color:#a9aeb7; }
+  .pcard {
+    position:absolute; top:calc(100% + 8px); left:0; z-index:30; width:288px;
+    background:#fff; border:1px solid var(--line); border-radius:16px; padding:12px;
+    box-shadow:0 18px 44px rgba(16,24,40,.16); display:none;
+  }
+  .pcard.on { display:block; }
+  .pcard.right { left:auto; right:0; }
+  .phead { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+  .phead .yr { font-size:13px; font-weight:600; color:#3a4450; }
+  .phead button { border:0; background:transparent; color:#6b7280; cursor:pointer;
+                  width:26px; height:26px; border-radius:8px; font-size:14px; }
+  .phead button:hover { background:#f1f2f5; color:#111; }
+  .pgrid { display:grid; grid-template-columns:repeat(4, 1fr); gap:6px; }
+  .pcell {
+    padding:9px 0; border:0; border-radius:9px; background:#f7f8fa; color:#2c3138;
+    font-family:inherit; font-size:12.5px; cursor:pointer;
+  }
+  .pcell:hover { background:#eceef2; }
+  .pcell.sel { background:#1f3b73; color:#fff; }
+  .pcell.off { color:#cdd2da; background:#fafbfc; cursor:not-allowed; }
+  .pcell.off:hover { background:#fafbfc; }
+  .pcell.wide { grid-column:1 / -1; }
+  .pfoot { margin-top:9px; padding-top:9px; border-top:1px solid var(--line);
+           font-size:11.5px; color:#a9aeb7; line-height:1.5; }
+
+  /* ---------- 卡片 ---------- */
+  .card {
+    background:var(--card); border:1px solid var(--line); border-radius:28px;
+    padding:26px 28px; margin-bottom:18px;
+  }
+  .row { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+  .muted { color:var(--sub); }
+
+  input[type=text] {
+    flex:1; min-width:300px; padding:11px 14px; border:1px solid var(--line);
+    border-radius:12px; font-size:13px; font-family:inherit; background:#fbfbfc;
+  }
+  input[type=text]:focus { outline:none; border-color:#c9cede; background:#fff; }
+
+  button.btn {
+    padding:11px 20px; border:0; border-radius:12px; background:#f2f3f6; color:#2c3138;
+    font-size:13px; cursor:pointer; font-family:inherit; transition:background .15s;
+  }
+  button.btn:hover { background:#e9ebf0; }
+  button.btn.primary { background:#1f3b73; color:#fff; }
+  button.btn.primary:hover { background:#1a3364; }
+  button.btn.primary:active { background:#142a55; }
+  /* 禁用时也保持蓝色，只是压暗 */
+  button.btn.primary:disabled { background:#1f3b73; color:#fff; opacity:.55; }
+  button.btn:disabled { background:#eceef1; color:#a9aeb7; cursor:not-allowed; }
+
+  select { padding:10px 12px; border:1px solid var(--line); border-radius:12px;
+           font-family:inherit; font-size:13px; background:#fbfbfc; }
+  label.opt { color:var(--sub); font-size:13px; display:flex; align-items:center; gap:6px; }
+
+  /* ---------- 扫描表 ---------- */
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  th, td { text-align:left; padding:9px 8px; border-bottom:1px solid var(--line); }
+  th { color:var(--sub); font-weight:600; font-size:12px; }
+  td.n { font-variant-numeric: tabular-nums; width:96px; color:#4b515a; white-space:nowrap; }
+  tr:last-child td { border-bottom:0; }
+  .badge { display:inline-block; padding:2px 9px; border-radius:20px; font-size:11px; white-space:nowrap; }
+  .b-ok { background:#e7f6ef; color:var(--ok); }
+  .b-no { background:#fdecec; color:var(--warn); }
+  .sec-title { font-size:13px; font-weight:600; margin:0 0 6px; }
+
+  /* ---------- 日志页 ---------- */
+  .logrow { display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+            padding:12px 0; border-bottom:1px solid var(--line); }
+  .logrow:last-child { border-bottom:0; }
+  .logrow .lt { font-size:12.5px; color:var(--sub); width:150px;
+                font-variant-numeric:tabular-nums; }
+  .logrow .lm { flex:1; min-width:180px; font-size:13px; }
+  .logrow .ls { font-size:12.5px; color:var(--sub); }
+  .logrow .badge { flex:0 0 auto; }
+  .logempty { padding:34px 0; text-align:center; color:var(--sub); font-size:12.5px; }
+
+  /* ---------- 进度 ---------- */
+  .bar { height:8px; background:#eef0f4; border-radius:6px; overflow:hidden; margin:14px 0 10px; }
+  .bar > i { display:block; height:100%; width:0; background:var(--accent); transition:width .3s; }
+  .log { font-size:12.5px; color:var(--sub); white-space:pre-wrap; max-height:150px; overflow:auto; }
+  .dl a { display:inline-block; margin-right:10px; padding:10px 16px; background:#e7f6ef;
+          color:var(--ok); border-radius:10px; text-decoration:none; font-size:13px; }
+  .hide { display:none !important; }
+
+  /* ---------- 设置气泡 ---------- */
+  .settings {
+    position:fixed; left:14px; bottom:64px; width:210px; background:#fff;
+    border:1px solid var(--line); border-radius:12px; padding:6px;
+    box-shadow:0 12px 30px rgba(16,24,40,.14); display:none; z-index:40;
+  }
+  .settings.on { display:block; }
+  .settings .item {
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    padding:9px 11px; border-radius:8px; font-size:13px; cursor:pointer; color:#2c3138;
+  }
+  .settings .item:hover { background:#f3f4f7; }
+  .settings .item.danger { color:var(--warn); }
+  .settings .sep { height:1px; background:var(--line); margin:5px 6px; }
+  .settings .ver { font-size:11.5px; color:var(--sub); padding:6px 11px 4px; }
+
+  /* ---------- 说明弹框 ---------- */
+  .mask { position:fixed; inset:0; background:rgba(16,22,32,.42); z-index:60;
+          display:none; align-items:center; justify-content:center; padding:24px; }
+  .mask.on { display:flex; }
+  .modal { background:#fff; width:min(720px,94vw); max-height:84vh; overflow:auto;
+           border-radius:18px; padding:22px 26px 26px; box-shadow:0 24px 60px rgba(10,20,40,.28); }
+  .modal .mhead { display:flex; align-items:center; justify-content:space-between; }
+  .modal h2 { font-size:18px; margin:0; }
+  .modal h3 { font-size:13.5px; margin:18px 0 6px; color:var(--blue); }
+  .modal p { font-size:13px; line-height:1.85; color:#3a4450; margin:6px 0; }
+  .modal ol, .modal ul { margin:6px 0 0 20px; padding:0; }
+  .modal li { font-size:13px; line-height:1.9; color:#3a4450; }
+  .modal code { background:#f1f3f7; padding:1px 5px; border-radius:4px; font-size:12px; }
+  .modal .kx { border:0; background:#f1f2f5; color:var(--sub); width:30px; height:30px;
+               border-radius:9px; cursor:pointer; font-size:15px; }
+  .modal .kx:hover { background:#e6e8ee; color:var(--ink); }
+</style>
+</head>
+<body>
+
+<header class="brandbar">
+  <div class="brand-in">
+    <div class="logo" role="img" aria-label="MutiToONE"></div>
+    <div class="bname">MutiToONE</div>
+  </div>
+</header>
+
+<div class="body">
+  <nav class="rail">
+    <button class="nav active" id="navHome" data-tip="首页">
+      <svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5.5 9.5V20h13V9.5"/></svg>
+    </button>
+    <button class="nav" id="navHelp" data-tip="说明">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6"/><path d="M12 7.6v.6"/></svg>
+    </button>
+    <button class="nav" id="navComp" data-tip="组件">
+      <svg viewBox="0 0 24 24"><path d="M12 3 20 7.5v9L12 21 4 16.5v-9L12 3z"/><path d="M4 7.5 12 12l8-4.5"/><path d="M12 12v9"/></svg>
+    </button>
+    <button class="nav" id="navLog" data-tip="日志">
+      <svg viewBox="0 0 24 24"><path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4"/><path d="M10 12h7"/><path d="M10 16h7"/></svg>
+    </button>
+    <button class="nav" id="navDl" data-tip="下载">
+      <svg viewBox="0 0 24 24"><path d="M12 3v11"/><path d="M8 11l4 4 4-4"/><path d="M4 17v3h16v-3"/></svg>
+      <span class="prg" id="dlPrg"></span>
+      <span class="rdot" id="dlDot"></span>
+    </button>
+    <div class="spacer"></div>
+    <button class="nav" id="navSettings" data-tip="设置">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/>
+        <path d="M19.4 13.5a7.7 7.7 0 0 0 0-3l2-1.5-2-3.4-2.4.9a7.6 7.6 0 0 0-2.6-1.5L14 2h-4l-.4 2.5A7.6 7.6 0 0 0 7 6L4.6 5.1l-2 3.4 2 1.5a7.7 7.7 0 0 0 0 3l-2 1.5 2 3.4L7 17.4a7.6 7.6 0 0 0 2.6 1.5L10 22h4l.4-2.5a7.6 7.6 0 0 0 2.6-1.5l2.4.9 2-3.4-2-1.5z"/></svg>
+    </button>
+  </nav>
+
+  <main class="content">
+    <div class="wrap">
+      <div class="pagehead">
+        <h1 class="page-title" id="pageTitle">首页</h1>
+        <div class="hact">
+          <div class="ring hide" id="ring" title="生成进度">
+            <svg viewBox="0 0 36 36">
+              <circle class="rbg" cx="18" cy="18" r="15.5"/>
+              <circle class="rfg" id="ringFg" cx="18" cy="18" r="15.5"/>
+            </svg>
+            <span id="ringPct">0%</span>
+          </div>
+          <button class="bell" id="bellBtn" title="通知">
+            <svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 1 0-12 0c0 6-3 7-3 7h18s-3-1-3-7"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+            <span class="dot"></span>
+          </button>
+        </div>
+        <div class="notices" id="noticePanel">
+          <div class="hd"><span>通知</span><a href="javascript:void(0)" id="markRead">全部标为已读</a></div>
+          <div id="noticeList"></div>
+        </div>
+      </div>
+
+      <div id="viewHome">
+      <div class="card">
+        <div class="row">
+          <input id="dir" type="text" placeholder="请浏览并选择本地文件目录……">
+          <button class="btn" id="btnBrowse">浏览…</button>
+          <button class="btn primary" id="btnScan">扫描</button>
+          <button class="btn primary" id="btnBuild">生成合订本</button>
+        </div>
+        <div class="row" style="margin-top:14px">
+          <span class="muted">年份区间</span>
+          <div class="picker" id="pickStart">
+            <button class="pbtn" id="startBtn">
+              <span id="startLabel" class="ph">请选择</span>
+              <svg class="cv" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+            </button>
+            <div class="pcard" id="startCard"></div>
+          </div>
+          <span class="muted">—</span>
+          <div class="picker" id="pickEnd">
+            <button class="pbtn" id="endBtn">
+              <span id="endLabel" class="ph">请选择</span>
+              <svg class="cv" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+            </button>
+            <div class="pcard right" id="endCard"></div>
+          </div>
+          <label class="opt" style="margin-left:auto">
+            <input id="wantPdf" type="checkbox"> 同时导出 PDF（需要装 Word，较慢）
+          </label>
+        </div>
+      </div>
+
+      <div id="scanCard" class="card hide">
+        <div class="sec-title" id="scanSummary"></div>
+        <div id="tableBox"></div>
+      </div>
+
+      </div><!-- /viewHome -->
+
+      <div id="viewDl" class="hide">
+        <div class="card" id="dlEmpty">
+          <div class="logempty">还没有生成合订本。<br>回「首页」选好目录和年份区间，点「生成合订本」。</div>
+        </div>
+        <div id="runCard" class="card hide">
+          <div id="runMsg" style="font-size:13px"></div>
+          <div class="bar"><i id="bar"></i></div>
+          <div id="log" class="log"></div>
+          <div id="dlBox" class="dl hide" style="margin-top:14px"></div>
+        </div>
+      </div>
+
+      <div id="viewLogs" class="hide">
+        <div class="card">
+          <div class="row" style="justify-content:space-between; align-items:flex-start">
+            <div style="min-width:0">
+              <div class="sec-title">生成日志</div>
+              <div class="muted" id="logDirText" style="font-size:12.5px;word-break:break-all"></div>
+            </div>
+            <div class="row" style="flex:0 0 auto">
+              <button class="btn primary" id="btnLogDir">更改目录</button>
+              <button class="btn primary" id="btnLogOpen">打开文件夹</button>
+              <button class="btn" id="btnLogRefresh">刷新</button>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div id="logList"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="settings" id="settingsBox">
+  <div class="ver" id="appVer">MutiToONE · 版本 —</div>
+  <div class="sep"></div>
+  <div class="item" id="setOutput">打开输出文件夹</div>
+  <div class="item" id="setComp">组件更新</div>
+  <div class="sep"></div>
+  <div class="item danger" id="setQuit">退出</div>
+</div>
+
+<div class="mask" id="helpMask">
+  <div class="modal">
+    <div class="mhead">
+      <h2>MutiToONE 使用说明</h2>
+      <button class="kx" id="helpClose" title="关闭">✕</button>
+    </div>
+
+    <h3>这个工具做什么</h3>
+    <p>把「一年一个文件、题目与答案分开存放」的真题 PDF，自动合成一本
+       <b>题目 1 → 答案 1 → 解析 1 → 题目 2 → …</b> 的合订本（Word / PDF / Markdown）。
+       它按题号把两份 PDF 切开再重新对齐，图形题会保留原图，资料分析的公共材料会挂在所属题组前面。</p>
+    <p>不限于公务员考试 —— 只要题目和答案分在两份文件里，且题目按题号连续编号，各类考试都能用；
+       项目里自带的那批是江苏省考行测（A 类），只是用作示例。</p>
+
+    <h3>怎么用</h3>
+    <ol>
+      <li>把真题 PDF 放进任意一个文件夹（不用改名、不用建子目录，平铺就行）</li>
+      <li>在顶部目录框填入或点 <b>浏览…</b> 选中该文件夹</li>
+      <li>点 <b>扫描</b> —— 列出「哪一年 / 哪份题目 / 哪份答案」，逐行显示配对状态</li>
+      <li>选年份区间，点 <b>生成合订本</b>，先选存放位置，进度条走完后点下载</li>
+    </ol>
+
+    <h3>能识别什么、不能识别什么</h3>
+    <p><b>只能处理带文字层的 PDF（非扫描件）。</b>程序靠读取 PDF 里的文字来判断题号、选项和答案解析的位置，
+       如果 PDF 是扫描出来的图片（整页只有图像、没有可复制的文字），就读不到题号，这类文件无法解析。</p>
+    <ul>
+      <li><b>可用</b>：从考试机构官网、题库下载的正规 PDF；用 Word/WPS 导出的 PDF；有文字层的电子版</li>
+      <li><b>不可用</b>：手机拍照转的 PDF、扫描仪扫的 PDF、整页截图的 PDF</li>
+    </ul>
+    <p>判断方法：用浏览器或阅读器打开，<b>能选中并复制文字</b>的就是可用的；拖选一片全是蓝框、复制不出字的，就是扫描件。</p>
+    <p>补充：如果只有<b>答案</b>是扫描件，程序仍会照常生成合订本，只是把那份扫描版答案以整页图片的形式附在书末
+       （项目里的 2017 年就是这种情况）。</p>
+    <p style="color:#8b919b;font-size:12.5px">扫描件需要 OCR 识别，本程序没有内置 OCR。若有需要，可先用外部工具把扫描件转成带文字层的 PDF 再交给本程序。</p>
+
+    <h3>成品叫什么、存在哪</h3>
+    <p>成品统一命名为 <code>合订本.docx</code>（勾选导出 PDF 时另有 <code>合订本.pdf</code>），
+       存放位置在点「生成合订本」时由你选择，默认定位在真题所在的文件夹。同名文件会被覆盖。</p>
+    <p>左下角 <b>设置 → 退出</b> 关闭程序。</p>
+
+    <h3>LinkSwift 是什么</h3>
+    <p>LinkSwift（网盘直链下载助手）是一个开源的浏览器油猴脚本，能在网盘页面直接给出文件的真实下载地址，
+       省掉「装客户端 + 一个个点」的麻烦，支持百度网盘、夸克、阿里、123 等多家网盘。</p>
+    <p>它不是本程序的一部分：<b>本程序不随包分发它</b>，只在你要的时候从官方仓库取最新版。</p>
+
+    <h3>组件里能做什么</h3>
+    <p>点左侧 <b>组件</b> 打开的窗口里，可以：</p>
+    <ul>
+      <li><b>检查 LinkSwift 更新</b> —— 对比官方仓库的最新版本，发现新版可一键下载并安装到浏览器</li>
+      <li><b>检查 MutiToONE 自身更新</b> —— 对比 GitHub 上发布的最新版本；检测到新版本时会<b>自动更新</b>，
+          更新完成后重启程序即可生效</li>
+    </ul>
+    <p style="color:#8b919b;font-size:12.5px">若「检查更新」提示未配置更新源，说明当前这份程序还没有绑定 GitHub 仓库。</p>
+  </div>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+let scanned = null, timer = null;
+let OUTDIR_DEFAULT = '';
+
+async function api(path, body) {
+  const opt = body ? {method:'POST', headers:{'Content-Type':'application/json'},
+                      body: JSON.stringify(body)} : {};
+  const r = await fetch(path, opt);
+  const t = await r.text();
+  try { return JSON.parse(t); } catch (e) { return {error: t}; }
+}
+
+// 是否跑在 pywebview 桌面窗口里
+function isDesktop() {
+  return !!(window.pywebview && window.pywebview.api);
+}
+
+// ---------------- 年月选择卡片 ----------------
+let YEARS = [];                       // [{year, month, label}, ...]
+const PICK = { start: null, end: null };      // 选中的 {year, month, label}
+const VIEW = { start: null, end: null };      // 卡片当前浏览的年份
+
+function labelOf(e) { return e ? (e.label || (e.year + '年')) : '请选择'; }
+
+function syncLabels() {
+  const s = $('#startLabel'), e = $('#endLabel');
+  s.textContent = labelOf(PICK.start);
+  e.textContent = labelOf(PICK.end);
+  s.classList.toggle('ph', !PICK.start);
+  e.classList.toggle('ph', !PICK.end);
+}
+
+function closeCards() {
+  ['start', 'end'].forEach(w => {
+    (w === 'start' ? $('#startCard') : $('#endCard')).classList.remove('on');
+    (w === 'start' ? $('#startBtn') : $('#endBtn')).classList.remove('on');
+  });
+}
+
+function allYears() {
+  return Array.from(new Set(YEARS.map(e => e.year))).sort((a, b) => a - b);
+}
+
+function entriesOf(y) {
+  return YEARS.filter(e => e.year === y);
+}
+
+function renderCard(which) {
+  const card = which === 'start' ? $('#startCard') : $('#endCard');
+  if (!YEARS.length) {
+    card.innerHTML = '<div class="pfoot" style="border:0;margin:0">请先点「扫描」获取年月</div>';
+    return;
+  }
+  const years = allYears();
+  let y = VIEW[which];
+  if (!y) y = PICK[which] ? PICK[which].year : years[0];
+  if (y < years[0]) y = years[0];
+  if (y > years[years.length - 1]) y = years[years.length - 1];
+  VIEW[which] = y;
+
+  const ents = entriesOf(y);
+  const months = {};
+  ents.forEach(e => { if (e.month) months[e.month] = e; });
+  const whole = ents.find(e => !e.month) || null;
+  const sel = PICK[which];
+  const selHere = sel && sel.year === y;
+
+  let h = '<div class="phead">'
+        + `<button data-nav="-1" ${y === years[0] ? 'disabled' : ''}>‹</button>`
+        + `<span class="yr">${y}年</span>`
+        + `<button data-nav="1" ${y === years[years.length - 1] ? 'disabled' : ''}>›</button>`
+        + '</div><div class="pgrid">';
+
+  for (let m = 1; m <= 12; m++) {
+    const has = !!months[m];
+    const on = selHere && sel.month === m;
+    h += has
+      ? `<button class="pcell ${on ? 'sel' : ''}" data-month="${m}">${m}月</button>`
+      : `<button class="pcell off" disabled>${m}月</button>`;
+  }
+  if (whole) {
+    const on = selHere && !sel.month;
+    h += `<button class="pcell wide ${on ? 'sel' : ''}" data-whole="1">全年（该年只有一套，未标注月份）</button>`;
+  }
+  h += '</div><div class="pfoot">左右箭头换年份，点亮的月份是该年可选的试卷</div>';
+  card.innerHTML = h;
+
+  card.querySelectorAll('[data-nav]').forEach(b => {
+    b.onclick = ev => {
+      ev.stopPropagation();
+      VIEW[which] = y + Number(b.dataset.nav);
+      renderCard(which);
+    };
+  });
+  card.querySelectorAll('[data-month]').forEach(b => {
+    b.onclick = ev => {
+      ev.stopPropagation();
+      const e = months[Number(b.dataset.month)];
+      pick(which, e);
+    };
+  });
+  const wb = card.querySelector('[data-whole]');
+  if (wb) wb.onclick = ev => { ev.stopPropagation(); pick(which, whole); };
+}
+
+function pick(which, e) {
+  PICK[which] = { year: e.year, month: e.month || null, label: e.label };
+  const a = PICK.start, z = PICK.end;
+  if (a && z) {
+    const ka = a.year * 100 + (a.month || 0);
+    const kz = z.year * 100 + (z.month || 0);
+    if (ka > kz) {
+      if (which === 'start') PICK.end = { ...PICK.start };
+      else PICK.start = { ...PICK.end };
+    }
+  }
+  syncLabels();
+  closeCards();
+}
+
+function toggleCard(which, ev) {
+  ev.stopPropagation();
+  const card = which === 'start' ? $('#startCard') : $('#endCard');
+  const btn = which === 'start' ? $('#startBtn') : $('#endBtn');
+  const wasOpen = card.classList.contains('on');
+  closeCards();
+  if (wasOpen) return;
+  VIEW[which] = PICK[which] ? PICK[which].year : null;
+  renderCard(which);
+  card.classList.add('on');
+  btn.classList.add('on');
+}
+
+$('#startBtn').onclick = e => toggleCard('start', e);
+$('#endBtn').onclick = e => toggleCard('end', e);
+document.addEventListener('click', e => {
+  if (!e.target.closest('.picker')) closeCards();
+});
+
+function setOptions(rows) {
+  YEARS = rows.map(r => ({ year: r.year, month: r.month || null,
+                           label: r.label || (r.year + '年') }));
+  PICK.start = YEARS.length ? { ...YEARS[0] } : null;
+  PICK.end = YEARS.length ? { ...YEARS[YEARS.length - 1] } : null;
+  VIEW.start = VIEW.end = null;
+  syncLabels();
+}
+
+function renderTable(rows) {
+  let h = '<table><tr><th>年份</th><th>题目文件</th><th>答案文件</th><th></th></tr>';
+  rows.forEach(r => {
+    const ok = r.has_q && r.has_a;
+    h += `<tr><td class="n">${r.label || r.year}</td>`;
+    h += `<td>${r.q || '<span class="muted">未找到</span>'}</td>`;
+    h += `<td>${r.a || '<span class="muted">未找到</span>'}</td>`;
+    h += `<td><span class="badge ${ok?'b-ok':'b-no'}">${ok?'配对成功':'缺文件'}</span></td></tr>`;
+  });
+  h += '</table>';
+  $('#tableBox').innerHTML = h;
+}
+
+async function doScan() {
+  const dir = $('#dir').value.trim();
+  if (!dir) return;
+  $('#btnScan').disabled = true;
+  $('#btnScan').textContent = '扫描中…';
+  const res = await api('/api/scan?dir=' + encodeURIComponent(dir));
+  $('#btnScan').disabled = false;
+  $('#btnScan').textContent = '扫描';
+  if (res.error) { alert(res.error); return; }
+  scanned = res;
+  $('#scanSummary').innerHTML =
+    `目录里找到 <b>${res.total_pdfs}</b> 个 PDF，识别出 <b>${res.rows.length}</b> 个年份。`;
+  renderTable(res.rows);
+  setOptions(res.rows);
+  $('#scanCard').classList.remove('hide');
+  $('#btnBuild').disabled = res.rows.length === 0;
+}
+
+const RING_C = 2 * Math.PI * 15.5;   // 进度环周长
+
+function updateRing(p) {
+  const ring = $('#ring');
+  const v = Math.max(0, Math.min(100, p || 0));
+
+  // 顶部进度环
+  if (v <= 0) { ring.classList.add('hide'); }
+  else {
+    ring.classList.remove('hide');
+    $('#ringPct').textContent = Math.round(v) + '%';
+    $('#ringFg').style.strokeDashoffset = String(RING_C * (1 - v / 100));
+  }
+
+  // 左侧「下载」图标的角标进度环
+  const prg = $('#dlPrg');
+  if (v > 0 && v < 100) {
+    prg.classList.add('on');
+    prg.style.setProperty('--p', String(v));
+  } else {
+    prg.classList.remove('on');
+  }
+}
+
+function hideRingSoon() {
+  setTimeout(() => $('#ring').classList.add('hide'), 2600);
+}
+
+function setProgress(p, msg) {
+  $('#bar').style.width = Math.max(0, Math.min(100, p)) + '%';
+  if (msg) $('#runMsg').textContent = msg;
+  updateRing(p);
+}
+
+function revealRunCard() {
+  $('#dlEmpty').classList.add('hide');
+  $('#runCard').classList.remove('hide');
+}
+
+async function poll() {
+  const s = await api('/api/status');
+  if (s.error) return;
+  setProgress(s.progress, s.message);
+  if (s.log && s.log.length) $('#log').textContent = s.log.join('\n');
+  if (s.status === 'done') {
+    clearInterval(timer); timer = null;
+    $('#btnBuild').disabled = !scanned;
+    let h = '';
+    if (s.word)  h += `<a href="/api/download?f=${encodeURIComponent(s.word)}">下载 Word</a>`;
+    if (s.pdf)   h += `<a href="/api/download?f=${encodeURIComponent(s.pdf)}">下载 PDF</a>`;
+    if (s.outdir) h += `<a href="javascript:void(0)" data-open="${s.outdir}">打开所在文件夹</a>`;
+    $('#dlBox').innerHTML = h;
+    $('#dlBox').classList.remove('hide');
+    $('#dlBox').querySelectorAll('[data-open]').forEach(a => {
+      a.onclick = () => api('/api/open-folder', { path: a.dataset.open });
+    });
+    if (s.outdir) $('#runMsg').textContent = (s.message || '完成') + '　已保存到：' + s.outdir;
+    hideRingSoon();
+    $('#dlPrg').classList.remove('on');
+    if ($('#viewDl').classList.contains('hide')) $('#dlDot').classList.add('on');
+  } else if (s.status === 'error') {
+    clearInterval(timer); timer = null;
+    $('#btnBuild').disabled = !scanned;
+    $('#ring').classList.add('hide');
+    $('#dlPrg').classList.remove('on');
+    if ($('#viewDl').classList.contains('hide')) $('#dlDot').classList.add('on');
+  }
+}
+
+async function doBuild() {
+  if (!scanned) { alert('请先点「扫描」，确认题目与答案配对正确。'); return; }
+  if (!PICK.start || !PICK.end) { alert('请先选择年份区间。'); return; }
+
+  // 先问存到哪里：默认定位在真题所在的文件夹（与源文件同级）
+  $('#btnBuild').disabled = true;
+  const srcDir = $('#dir').value.trim();
+  const picked = await api('/api/pickoutdir', { initial: srcDir || OUTDIR_DEFAULT || '' });
+  if (picked.error) {
+    alert('打开保存位置选择框失败：' + picked.error);
+    $('#btnBuild').disabled = false;
+    return;
+  }
+  if (!picked.dir) { $('#btnBuild').disabled = false; return; }   // 用户取消
+
+  const body = {
+    dir: $('#dir').value.trim(),
+    start: PICK.start.year,
+    end: PICK.end.year,
+    pdf: $('#wantPdf').checked,
+    outdir: picked.dir
+  };
+  revealRunCard();
+  $('#dlBox').classList.add('hide');
+  $('#log').textContent = '';
+  setProgress(1, '开始解析…');
+  $('#btnBuild').disabled = true;
+  showView('dl');                    // 自动切到「下载」页看进度
+  const res = await api('/api/build', body);
+  if (res.error) { alert(res.error); $('#btnBuild').disabled = false; return; }
+  if (timer) clearInterval(timer);
+  timer = setInterval(poll, 1000);
+  poll();
+}
+
+$('#btnScan').onclick = doScan;
+$('#btnBuild').onclick = doBuild;
+$('#dir').addEventListener('keydown', e => { if (e.key === 'Enter') doScan(); });
+
+$('#btnBrowse').onclick = async () => {
+  const b = $('#btnBrowse');
+  b.disabled = true; b.textContent = '选择中…';
+  const r = await api('/api/pickdir', {});
+  b.disabled = false; b.textContent = '浏览…';
+  if (r.error) { alert('打开选择框失败：' + r.error); return; }
+  if (r.dir) { $('#dir').value = r.dir; doScan(); }
+};
+
+// ---------------- 左侧导航 ----------------
+$('#navHome').onclick = () => {
+  $('#helpMask').classList.remove('on');
+  showView('home');
+};
+
+$('#navHelp').onclick = () => {
+  document.querySelectorAll('.nav').forEach(n => n.classList.remove('active'));
+  $('#navHelp').classList.add('active');
+  $('#helpMask').classList.add('on');
+};
+
+$('#helpClose').onclick = () => {
+  $('#helpMask').classList.remove('on');
+  document.querySelectorAll('.nav').forEach(n => n.classList.remove('active'));
+  $('#navHome').classList.add('active');
+};
+$('#helpMask').addEventListener('click', e => {
+  if (e.target.id === 'helpMask') $('#helpClose').onclick();
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') $('#helpClose').onclick();
+});
+
+function openComponents() {
+  if (isDesktop() && window.pywebview.api.show_components) {
+    window.pywebview.api.show_components();
+    return;
+  }
+  window.open('/components', 'mutitoo-components',
+              'width=580,height=620,menubar=no,toolbar=no,location=no,status=no');
+}
+$('#navComp').onclick = openComponents;
+
+// ---------------- 左下角设置 ----------------
+$('#navSettings').onclick = e => {
+  e.stopPropagation();
+  $('#settingsBox').classList.toggle('on');
+};
+document.addEventListener('click', e => {
+  const box = $('#settingsBox');
+  if (box.classList.contains('on') && !box.contains(e.target) && e.target.id !== 'navSettings') {
+    box.classList.remove('on');
+  }
+});
+
+$('#setComp').onclick = () => { $('#settingsBox').classList.remove('on'); openComponents(); };
+$('#setOutput').onclick = async () => {
+  $('#settingsBox').classList.remove('on');
+  await api('/api/reveal-output', {});
+};
+$('#setQuit').onclick = async () => {
+  $('#settingsBox').classList.remove('on');
+  if (!confirm('退出 MutiToONE？')) return;
+  if (isDesktop() && window.pywebview.api.quit_app) {
+    await window.pywebview.api.quit_app();
+    return;
+  }
+  await api('/api/quit', {});
+  document.body.innerHTML =
+    '<div style="padding:80px 20px;text-align:center;color:#8b919b;font-size:15px">' +
+    '已退出，可以关掉这个页面了。</div>';
+};
+
+function openUpdateCard() {
+  if (isDesktop() && window.pywebview.api.show_update) {
+    window.pywebview.api.show_update();
+    return;
+  }
+  window.open('/update', 'mutitoo-update',
+              'width=740,height=500,menubar=no,toolbar=no,location=no,status=no');
+}
+
+// ---------------- 日志页 ----------------
+let LOG_DIR = '';
+let logTimer = null, logSig = '';
+
+function showView(name) {
+  const isLog = name === 'log', isDl = name === 'dl';
+  $('#viewHome').classList.toggle('hide', isLog || isDl);
+  $('#viewLogs').classList.toggle('hide', !isLog);
+  $('#viewDl').classList.toggle('hide', !isDl);
+  $('#pageTitle').textContent = isLog ? '日志' : (isDl ? '下载' : '首页');
+  $('#navHome').classList.toggle('active', !isLog && !isDl);
+  $('#navLog').classList.toggle('active', isLog);
+  $('#navDl').classList.toggle('active', isDl);
+  closeCards();
+  if (isDl) $('#dlDot').classList.remove('on');   // 看过了就不再提示
+  if (isLog) {
+    loadLogs();
+    if (!logTimer) logTimer = setInterval(loadLogs, 5000);   // 文件被外部删除/改动也能同步
+  } else if (logTimer) {
+    clearInterval(logTimer); logTimer = null;
+  }
+}
+
+async function loadLogs() {
+  const r = await api('/api/logs');
+  if (r.error) { $('#logDirText').textContent = '读取失败：' + r.error; return; }
+  LOG_DIR = r.dir || '';
+  $('#logDirText').textContent = LOG_DIR;
+
+  const items = r.items || [];
+  const sig = items.map(it => it.time + it.status).join('|');
+  if (sig === logSig) return;      // 没变化就不重绘，避免打断点击
+  logSig = sig;
+
+  if (!items.length) {
+    $('#logList').innerHTML = '<div class="logempty">还没有生成记录。<br>生成一次合订本后，这里会出现记录。</div>';
+    return;
+  }
+  let h = '';
+  items.forEach(it => {
+    const ok = it.status === 'ok';
+    const main = ok
+      ? `${it.years || ''} · ${it.count || 0} 题` + (it.missing ? `，缺解析 ${it.missing}` : '')
+      : (it.error || '生成失败');
+    h += '<div class="logrow">'
+       + `<span class="lt">${it.time || ''}</span>`
+       + `<span class="badge ${ok ? 'b-ok' : 'b-no'}">${ok ? '成功' : '失败'}</span>`
+       + `<span class="lm">${main}</span>`
+       + `<span class="ls">${it.seconds || 0}s</span>`
+       + '<a href="javascript:void(0)" data-logopen="1" '
+       + 'style="font-size:12.5px;color:#1f3b73;text-decoration:none">打开日志目录</a>'
+       + '</div>';
+  });
+  $('#logList').innerHTML = h;
+  $('#logList').querySelectorAll('[data-logopen]').forEach(a => {
+    a.onclick = () => openLogDir();
+  });
+}
+
+async function openLogDir() {
+  if (!LOG_DIR) await loadLogs();
+  if (!LOG_DIR) { alert('还没有确定日志目录。'); return; }
+  await api('/api/open-folder', { path: LOG_DIR });
+}
+
+$('#navHome').onclick = () => showView('home');
+$('#navLog').onclick = () => showView('log');
+$('#navDl').onclick = () => showView('dl');
+$('#btnLogRefresh').onclick = () => loadLogs();
+$('#btnLogOpen').onclick = () => openLogDir();
+$('#btnLogDir').onclick = async () => {
+  const r = await api('/api/logs/pick', { initial: LOG_DIR });
+  if (r.error) { alert('选择失败：' + r.error); return; }
+  if (!r.picked) return;          // 取消
+  loadLogs();
+};
+
+// ---------------- 通知中心 ----------------
+function renderNotices(data) {
+  const items = data.items || [];
+  const unread = items.some(n => !n.read);
+  $('#bellBtn').classList.toggle('has', unread);
+
+  if (!items.length) {
+    $('#noticeList').innerHTML = '<div class="empty">暂无通知</div>';
+    return;
+  }
+  let h = '';
+  items.forEach(n => {
+    h += `<div class="n ${n.read ? '' : 'unread'}">`;
+    h += `<div class="nt">${n.read ? '' : '<span class="p"></span>'}${n.title}</div>`;
+    h += `<div class="nd">${n.desc || ''}</div>`;
+    if (n.at) h += `<div class="nwhen">${n.at}</div>`;
+    h += `<div class="na">`;
+    if (n.action === 'open-update') h += `<button class="go" data-act="update">查看并更新</button>`;
+    h += `<button data-act="read">知道了</button></div></div>`;
+  });
+  $('#noticeList').innerHTML = h;
+  $('#noticeList').querySelectorAll('button').forEach(b => {
+    b.onclick = async () => {
+      if (b.dataset.act === 'update') {
+        $('#noticePanel').classList.remove('on');
+        openUpdateCard();
+        return;
+      }
+      await api('/api/updates/read', {});
+      loadNotices();
+    };
+  });
+}
+
+async function loadNotices() {
+  const r = await api('/api/updates');
+  if (r.error) return;
+  renderNotices(r);
+}
+
+$('#bellBtn').onclick = e => {
+  e.stopPropagation();
+  const p = $('#noticePanel');
+  p.classList.toggle('on');
+  if (p.classList.contains('on')) loadNotices();
+};
+
+document.addEventListener('click', e => {
+  const p = $('#noticePanel');
+  if (p.classList.contains('on') && !p.contains(e.target) && e.target.id !== 'bellBtn') {
+    p.classList.remove('on');
+  }
+});
+
+$('#markRead').onclick = async () => {
+  await api('/api/updates/read', {});
+  loadNotices();
+};
+
+// ---------------- 初始化 ----------------
+(async function init() {
+  // 路径默认留空，显示占位提示；由用户点「浏览…」选择
+  const info = await api('/api/ping');
+  OUTDIR_DEFAULT = (info && info.outdir) || '';
+
+  const st = await api('/api/update/status');
+  if (!st.error) $('#appVer').textContent = 'MutiToONE · 版本 ' + (st.current || '—');
+
+  const s = await api('/api/status');
+  if (s && (s.status === 'running' || s.status === 'done' || s.status === 'error')) {
+    revealRunCard();
+    setProgress(s.progress, s.message);
+    if (s.log) $('#log').textContent = s.log.join('\n');
+    if (s.status === 'running') { timer = setInterval(poll, 1000); }
+    else { poll(); }
+  }
+
+  // 油猴脚本用 ?auto=1 打开时：先取默认目录再自动扫描
+  if (new URLSearchParams(location.search).get('auto') === '1') {
+    const info = await api('/api/ping');
+    if (info.dir) $('#dir').value = info.dir;
+    doScan();
+  }
+  if (new URLSearchParams(location.search).get('help') === '1') $('#navHelp').onclick();
+  if (new URLSearchParams(location.search).get('view') === 'log') showView('log');
+  if (new URLSearchParams(location.search).get('view') === 'dl') showView('dl');
+  if (new URLSearchParams(location.search).get('pick') === '1') {
+    setTimeout(() => toggleCard('start', { stopPropagation() {} }), 1200);
+  }
+
+  loadNotices();
+  setInterval(loadNotices, 60000);   // 每分钟刷一次未读状态
+  if (new URLSearchParams(location.search).get('notices') === '1') {
+    setTimeout(() => $('#bellBtn').onclick({ stopPropagation() {} }), 300);
+  }
+})();
+</script>
+</body>
+</html>

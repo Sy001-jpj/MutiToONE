@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>组件</title>
+<style>
+  :root { --ink:#1b2430; --sub:#6b7684; --line:#e3e7ee; --accent:#1f3b73; --ok:#1a7f43; --warn:#b03030; }
+  * { box-sizing: border-box; }
+  body { margin:0; padding:16px 18px 18px; background:#fff; color:var(--ink);
+         font:13px/1.6 -apple-system,"Segoe UI","Microsoft YaHei",sans-serif; }
+  .top { display:flex; align-items:center; justify-content:space-between; margin-bottom:2px; }
+  h1 { font-size:15px; margin:0; }
+  .x { border:0; background:#eef2f8; color:var(--sub); width:26px; height:26px; border-radius:6px;
+       cursor:pointer; font-size:14px; line-height:1; }
+  .x:hover { background:#e2e8f2; color:var(--ink); }
+  .muted { color:var(--sub); }
+  .card { border:1px solid var(--line); border-radius:10px; padding:11px 13px; margin-top:11px; }
+  .name { font-weight:600; font-size:13.5px; }
+  .note { color:var(--sub); font-size:12px; margin:2px 0 9px; }
+  .row { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .ver { font-variant-numeric: tabular-nums; }
+  button.act { padding:6px 13px; border:0; border-radius:7px; background:var(--accent); color:#fff;
+               font-size:12.5px; cursor:pointer; font-family:inherit; }
+  button.ghost { background:#eef2f8; color:var(--accent); }
+  button:disabled { opacity:.55; cursor:not-allowed; }
+  .msg { min-height:18px; margin-top:8px; font-size:12px; line-height:1.55; }
+  .msg.upd { color:var(--warn); font-weight:600; }
+  .msg.ok { color:var(--ok); }
+  label.chk { display:flex; align-items:center; gap:5px; color:var(--sub); font-size:12.5px; }
+  .foot { margin-top:11px; font-size:12px; }
+  .foot a { color:var(--accent); text-decoration:none; margin-right:14px; }
+  .foot a:hover { text-decoration:underline; }
+  .repo { display:none; margin-top:8px; gap:6px; }
+  .repo.on { display:flex; }
+  .repo input { flex:1; padding:5px 8px; border:1px solid var(--line); border-radius:6px;
+                font-size:12px; font-family:inherit; }
+  .repo input:focus { outline:none; border-color:var(--accent); }
+  .hide { display:none !important; }
+</style>
+</head>
+<body>
+  <div class="top">
+    <h1>组件</h1>
+    <button class="x" id="btnClose" title="关闭">✕</button>
+  </div>
+  <div class="muted" style="font-size:12px">从官方仓库取最新版；随程序分发的东西这里都不打包。</div>
+
+  <!-- LinkSwift -->
+  <div class="card">
+    <div class="name">LinkSwift（网盘直链下载助手）</div>
+    <div class="note">装进浏览器的 Tampermonkey，负责在网盘页面提供下载按钮。</div>
+    <div class="row">
+      <span class="muted">当前版本</span>
+      <b class="ver" id="ver">读取中…</b>
+    </div>
+    <div class="row" style="margin-top:9px">
+      <button class="act ghost" id="btnCheck">检查更新</button>
+      <button class="act" id="btnInstall">下载并安装</button>
+      <button class="act ghost" id="btnTM">打开 Tampermonkey</button>
+    </div>
+    <div class="row hide" id="tmWarn" style="margin-top:9px; align-items:center; gap:8px; flex-wrap:wrap">
+      <span style="font-size:12.5px;color:#b4530a">没检测到 Tampermonkey（脚本管理器），装好它才能用这个脚本。</span>
+      <button class="act" id="btnGetTM">安装 Tampermonkey</button>
+    </div>
+    <div class="msg muted" id="msg"></div>
+  </div>
+
+  <!-- MutiToONE 自身 -->
+  <div class="card">
+    <div class="name">MutiToONE 本体</div>
+    <div class="note">从 GitHub 仓库检查本程序是否有新版本。</div>
+    <div class="row">
+      <span class="muted">当前版本</span>
+      <b class="ver" id="selfVer">—</b>
+      <span class="muted" id="selfRepo" style="font-size:11.5px"></span>
+    </div>
+    <div class="row" style="margin-top:9px">
+      <button class="act ghost" id="btnSelfCheck">检查更新</button>
+      <label class="chk"><input type="checkbox" id="autoUpd" checked> 自动更新</label>
+    </div>
+    <div class="repo" id="repoRow">
+      <input id="repoInput" type="text" placeholder="owner/repo，例如 yourname/MutiToONE">
+      <button class="act" id="btnRepoSave">保存</button>
+    </div>
+    <div class="msg muted" id="selfMsg"></div>
+  </div>
+
+  <div class="foot">
+    <a href="javascript:void(0)" id="lnkReveal">打开组件文件夹</a>
+    <a href="javascript:void(0)" id="lnkRepo">LinkSwift 仓库</a>
+    <a href="javascript:void(0)" id="lnkProj">打开 MutiToONE 地址</a>
+    <a href="javascript:void(0)" id="lnkRepoCfg">设置更新源</a>
+  </div>
+
+<script>
+const $ = s => document.querySelector(s);
+const ID = 'linkswift';
+const PROJ_URL = 'https://github.com/Sy001-jpj/MutiToONE';
+
+async function api(path, body) {
+  const opt = body ? {method:'POST', headers:{'Content-Type':'application/json'},
+                      body: JSON.stringify(body)} : {};
+  const r = await fetch(path, opt);
+  const t = await r.text();
+  try { return JSON.parse(t); } catch (e) { return {error: t}; }
+}
+
+function isDesktop() {
+  return !!(window.pywebview && window.pywebview.api);
+}
+
+function say(el, text, cls) {
+  const m = $(el);
+  m.textContent = text || '';
+  m.className = 'msg ' + (cls || 'muted');
+}
+
+// ---------------- LinkSwift ----------------
+let TM_OK = true;
+
+async function loadLinkSwift() {
+  const r = await api('/api/components');
+  if (r.error || !r.items) { say('#msg', '读取失败：' + (r.error || ''), 'upd'); return; }
+  const it = r.items.find(x => x.id === ID) || r.items[0];
+  $('#ver').textContent = it.local_version || '未安装';
+  TM_OK = !!it.tampermonkey;
+  $('#tmWarn').classList.toggle('hide', TM_OK);
+  if (!TM_OK) {
+    say('#msg', it.browser
+      ? `在 ${it.browser} 里没找到 Tampermonkey，先装它（点上面的按钮）。`
+      : '没检测到 Chrome/Edge，请用 Chrome 或 Edge 浏览器并安装 Tampermonkey。', 'upd');
+  }
+}
+
+$('#btnGetTM').onclick = async () => {
+  const b = $('#btnGetTM');
+  b.disabled = true;
+  const r = await api('/api/components/store', {});
+  b.disabled = false;
+  if (!r.ok) return say('#msg', r.error || '打开失败', 'upd');
+  say('#msg', `已打开 ${r.browser || '浏览器'} 的 Tampermonkey 安装页，装完回来点「打开 Tampermonkey」确认。`, 'ok');
+};
+
+$('#btnCheck').onclick = async () => {
+  const b = document.querySelectorAll('#btnCheck,#btnInstall');
+  b.forEach(x => x.disabled = true);
+  say('#msg', '检查中…');
+  const r = await api('/api/components/check', { id: ID });
+  b.forEach(x => x.disabled = false);
+  if (!r.ok) return say('#msg', r.error || '检查失败', 'upd');
+  if (r.has_update) say('#msg', `发现新版本 ${r.remote_version}（当前 ${r.local_version || '未安装'}），来源 ${r.source}`, 'upd');
+  else say('#msg', `已是最新 ${r.remote_version}`, 'ok');
+};
+
+$('#btnInstall').onclick = async () => {
+  const b = document.querySelectorAll('#btnCheck,#btnInstall');
+  b.forEach(x => x.disabled = true);
+  say('#msg', '下载中，请稍候…');
+  const r = await api('/api/components/install', { id: ID, open: TM_OK });
+  b.forEach(x => x.disabled = false);
+  if (!r.ok) return say('#msg', r.error || '下载失败', 'upd');
+  $('#ver').textContent = r.version || '已下载';
+  if (!TM_OK) {
+    say('#msg', `已下载 ${r.version} 到「组件」文件夹，但还没装 Tampermonkey——`
+              + '先点「安装 Tampermonkey」，装好后把 组件\\LinkSwift.user.js 拖进浏览器即可。', 'upd');
+    return;
+  }
+  say('#msg', r.opened ? `已下载 ${r.version}，已在浏览器打开安装页`
+                       : `已下载 ${r.version}，可手动拖入 Tampermonkey`, 'ok');
+};
+
+$('#btnTM').onclick = async () => {
+  const b = $('#btnTM');
+  b.disabled = true;
+  say('#msg', '正在查找 Tampermonkey…');
+  const r = await api('/api/components/tampermonkey', {});
+  b.disabled = false;
+  if (!r.ok) return say('#msg', r.error || '打开失败', 'upd');
+  if (r.mode === 'dashboard') {
+    say('#msg', `已在 ${r.browser} 打开 Tampermonkey 管理面板`, 'ok');
+  } else {
+    say('#msg', r.message || '已打开 Tampermonkey 官网', 'upd');
+  }
+};
+
+// ---------------- MutiToONE 本体 ----------------
+async function loadSelf() {
+  const s = await api('/api/update/status');
+  if (s.error) return;
+  $('#selfVer').textContent = s.current || '—';
+  $('#autoUpd').checked = !!s.auto;
+  $('#selfRepo').textContent = s.configured ? `更新源：${s.repo}` : '未配置更新源';
+  if (!s.configured) say('#selfMsg', '还没有绑定 GitHub 仓库，点右下角「设置更新源」填写 owner/repo。');
+}
+
+$('#autoUpd').onchange = async () => {
+  await api('/api/update/config', { auto: $('#autoUpd').checked });
+  say('#selfMsg', $('#autoUpd').checked ? '已开启自动更新' : '已关闭自动更新', 'ok');
+};
+
+$('#btnSelfCheck').onclick = async () => {
+  const b = $('#btnSelfCheck');
+  b.disabled = true;
+  say('#selfMsg', '检查中…');
+  const r = await api('/api/update/check', {});
+  b.disabled = false;
+  if (r.error) return say('#selfMsg', r.error, 'upd');
+  if (!r.configured) { say('#selfMsg', r.message || '未配置更新源', 'upd'); return; }
+  if (r.has_update) {
+    say('#selfMsg', `发现新版本 ${r.latest}（当前 ${r.current}）`, 'upd');
+    openUpdateCard();
+  } else {
+    say('#selfMsg', `已是最新 ${r.latest || r.current}`, 'ok');
+  }
+};
+
+function openUpdateCard() {
+  if (isDesktop() && window.pywebview.api.show_update) {
+    window.pywebview.api.show_update();
+    return;
+  }
+  window.open('/update', 'mutitoo-update',
+              'width=740,height=500,menubar=no,toolbar=no,location=no,status=no');
+}
+
+$('#lnkRepoCfg').onclick = () => {
+  $('#repoRow').classList.toggle('on');
+  if ($('#repoRow').classList.contains('on')) $('#repoInput').focus();
+};
+
+$('#btnRepoSave').onclick = async () => {
+  const repo = $('#repoInput').value.trim();
+  const r = await api('/api/update/config', { repo });
+  if (r.ok) {
+    say('#selfMsg', repo ? `更新源已设为 ${repo}` : '已清空更新源', 'ok');
+    $('#selfRepo').textContent = repo ? `更新源：${repo}` : '未配置更新源';
+    $('#repoRow').classList.remove('on');
+  } else {
+    say('#selfMsg', '保存失败：' + (r.error || ''), 'upd');
+  }
+};
+
+// ---------------- 杂项 ----------------
+$('#lnkReveal').onclick = () => api('/api/components/reveal', { id: ID });
+$('#lnkProj').onclick = () => api('/api/open-url', { url: PROJ_URL });
+$('#lnkRepo').onclick = () => {
+  const u = 'https://github.com/hmjz100/LinkSwift';
+  if (isDesktop() && window.pywebview.api.open_url) window.pywebview.api.open_url(u);
+  else window.open(u, '_blank');
+};
+$('#btnClose').onclick = () => {
+  if (isDesktop() && window.pywebview.api.hide_components) window.pywebview.api.hide_components();
+  else window.close();
+};
+
+loadLinkSwift();
+loadSelf();
+</script>
+</body>
+</html>

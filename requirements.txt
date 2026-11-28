@@ -1,0 +1,4 @@
+# 运行网页版所需（三个都要）
+PyMuPDF>=1.23
+python-docx>=1.1
+Pillow>=10.0

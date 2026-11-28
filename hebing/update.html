@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>发现新版本</title>
+<style>
+  :root { --ink:#141414; --sub:#8a8f98; --chip:#f2f3f5; --box:#f4f5f7; }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body { margin:0; background:#fff; color:var(--ink);
+         font:14px/1.65 -apple-system,"Segoe UI","Microsoft YaHei",sans-serif; }
+  .sheet { display:flex; flex-direction:column; height:100%; padding:26px 28px 22px; }
+
+  .head { display:flex; align-items:flex-start; justify-content:space-between; }
+  h1 { font-size:21px; font-weight:700; margin:0; letter-spacing:.4px; }
+  .x { border:0; background:transparent; color:#6b7280; font-size:20px; line-height:1;
+       cursor:pointer; padding:2px 4px; }
+  .x:hover { color:#111; }
+
+  .chips { display:flex; gap:8px; flex-wrap:wrap; margin:14px 0 20px; }
+  .chip { background:var(--chip); color:#4b5563; border-radius:999px;
+          padding:5px 13px; font-size:12.5px; }
+
+  .label { font-size:14px; font-weight:700; margin-bottom:10px; }
+
+  .notes { background:var(--box); border-radius:16px; padding:18px 20px;
+           flex:1; min-height:90px; overflow:auto; }
+  .notes .ntitle { font-size:16px; font-weight:700; display:flex; align-items:center; gap:8px; }
+  .notes .ntitle .spark { font-size:15px; }
+  .notes .other { font-size:15px; font-weight:700; margin-top:2px; }
+  .notes .body { margin-top:8px; font-size:13px; color:#374151; line-height:1.85; white-space:pre-wrap; }
+  .notes .body h1, .notes .body h2, .notes .body h3 { font-size:13.5px; margin:10px 0 4px; }
+  .notes ul { margin:6px 0 0 20px; padding:0; }
+  .notes li { margin:3px 0; }
+  .empty { color:var(--sub); font-size:12.5px; }
+
+  .bar { margin-top:16px; }
+  button.go { width:100%; border:0; border-radius:12px; background:#1b1b1b; color:#fff;
+              display:flex; align-items:center; justify-content:space-between; gap:12px;
+              padding:15px 20px; font:600 15px/1 inherit; cursor:pointer; font-family:inherit; }
+  button.go:hover { background:#000; }
+  button.go:disabled { background:#9aa0a6; cursor:default; }
+  .go .left { display:flex; align-items:center; gap:10px; }
+  .go .dl { font-size:16px; }
+  .go .file { font-weight:400; font-size:12.5px; color:#d7dae0; }
+  .tip { margin-top:10px; font-size:12px; color:var(--sub); min-height:18px; }
+  .tip.err { color:#b03030; }
+  .tip.ok { color:#1a7f43; }
+</style>
+</head>
+<body>
+<div class="sheet">
+  <div class="head">
+    <h1 id="title">发现新版本</h1>
+    <button class="x" id="btnClose" title="关闭">✕</button>
+  </div>
+
+  <div class="chips">
+    <span class="chip">当前版本 <b id="cur">—</b></span>
+    <span class="chip">最新版本 <b id="latest">—</b></span>
+    <span class="chip">更新时间 <b id="time">—</b></span>
+  </div>
+
+  <div class="label">更新内容</div>
+  <div class="notes">
+    <div class="ntitle"><span class="spark">✨</span><span>更新日志</span></div>
+    <div class="other" id="subtitle"></div>
+    <div class="body" id="body"><span class="empty">这次发布没有填写更新说明。</span></div>
+  </div>
+
+  <div class="bar">
+    <button class="go" id="btnGo">
+      <span class="left"><span class="dl">⤓</span><span id="goText">立即更新</span></span>
+      <span class="file" id="fileName"></span>
+    </button>
+    <div class="tip" id="tip"></div>
+  </div>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+let info = null, busy = false;
+
+async function api(path, body) {
+  const opt = body ? {method:'POST', headers:{'Content-Type':'application/json'},
+                      body: JSON.stringify(body)} : {};
+  const r = await fetch(path, opt);
+  const t = await r.text();
+  try { return JSON.parse(t); } catch (e) { return {error: t}; }
+}
+
+function fmtTime(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return iso;
+  const p = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日 ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
+}
+
+// 极简 markdown：标题行加粗、列表转 li、去掉链接语法
+function renderNotes(md) {
+  if (!md) return '';
+  const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const lines = md.split(/\r?\n/);
+  let html = '', inList = false;
+  for (let raw of lines) {
+    let l = raw.trim();
+    if (!l) { if (inList) { html += '</ul>'; inList = false; } continue; }
+    l = l.replace(/^#{1,6}\s*/, '').replace(/\[([^\]]+)\]\([^)]*\)/g, '$1');
+    if (/^[-*+]\s+/.test(l)) {
+      if (!inList) { html += '<ul>'; inList = true; }
+      html += '<li>' + esc(l.replace(/^[-*+]\s+/, '')) + '</li>';
+    } else {
+      if (inList) { html += '</ul>'; inList = false; }
+      html += '<h3>' + esc(l) + '</h3>';
+    }
+  }
+  if (inList) html += '</ul>';
+  return html;
+}
+
+async function load() {
+  const r = await api('/api/update/check', {});
+  info = r;
+  if (r.error || r.configured === false) {
+    $('#title').textContent = '暂无可用的更新';
+    $('#cur').textContent = r.current || '—';
+    $('#latest').textContent = '—';
+    $('#body').innerHTML = '<span class="empty">' +
+      (r.message || r.error || '没有配置更新源。') + '</span>';
+    $('#btnGo').disabled = true;
+    $('#goText').textContent = '无法更新';
+    return;
+  }
+  $('#cur').textContent = r.current || '—';
+  $('#latest').textContent = r.latest || '—';
+  $('#time').textContent = fmtTime(r.published_at);
+  const tag = r.tag || ('v' + (r.latest || ''));
+  $('#fileName').textContent = `MutiToONE-${tag}.zip`;
+  $('#body').innerHTML = renderNotes(r.body);
+
+  if (!r.has_update) {
+    $('#title').textContent = '已是最新版本';
+    $('#btnGo').disabled = true;
+    $('#goText').textContent = '无需更新';
+    $('#tip').textContent = '';
+  }
+}
+
+$('#btnGo').onclick = async () => {
+  if (busy || !info || !info.has_update) return;
+  busy = true;
+  $('#btnGo').disabled = true;
+  $('#goText').textContent = '正在下载并替换…';
+  $('#tip').className = 'tip';
+  $('#tip').textContent = '请勿关闭窗口';
+
+  const r = await api('/api/update/apply', { zip_url: info.zip_url, zip_urls: info.zip_urls });
+  busy = false;
+  if (r.ok) {
+    $('#goText').textContent = '更新完成';
+    $('#tip').className = 'tip ok';
+    $('#tip').textContent = `已替换 ${r.files} 个文件，关闭并重新打开 MutiToONE 后生效。`;
+  } else {
+    $('#btnGo').disabled = false;
+    $('#goText').textContent = '重试更新';
+    $('#tip').className = 'tip err';
+    $('#tip').textContent = '更新失败：' + (r.error || '未知错误');
+  }
+};
+
+$('#btnClose').onclick = () => {
+  if (window.pywebview && window.pywebview.api && window.pywebview.api.hide_update) {
+    window.pywebview.api.hide_update();
+  } else {
+    window.close();
+  }
+};
+
+load();
+</script>
+</body>
+</html>
